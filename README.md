@@ -10,4 +10,4 @@
 
    > 세미나 강의를 듣고 정리한 내용입니다.
 
-   [우아한테크세미나 - 우아한 스프링 부트](Seminar/UwahanTechSeminar_UwahanSpringBoot.md)
+   - [우아한테크세미나 - 우아한 스프링 부트](Seminar/UwahanTechSeminar_UwahanSpringBoot.md)
