@@ -76,7 +76,7 @@ npm start
 
 - 화면 출력
 
-  ![image-20210604123710904](../../md-img/image-20210604123710904.png)
+  ![image-20210604123710904](../../../md-img/image-20210604123710904.png)
 
 ## 3. Class Component와 Function Component에서의 `props` 사용
 
@@ -144,6 +144,5 @@ class ClassComp extends React.Component {
     )
   }
 }
-
 ```
 
