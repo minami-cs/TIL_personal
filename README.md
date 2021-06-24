@@ -11,6 +11,7 @@
    > 강의를 수강하면서 공부한 내용입니다.
 
    - [생활코딩 - React](Lecture/React/React.md)
+   - [생활코딩 - React_class_vs._function_style_coding](Lecture/React/React_class_vs_function.md)
    
 2. Seminar
 
