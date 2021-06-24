@@ -76,7 +76,7 @@ npm start
 
 - 화면 출력
 
-  ![image-20210604123710904](../../../md-img/image-20210604123710904.png)
+  ![image-20210604123710904](../../md-img/image-20210604123710904.png)
 
 ## 3. Class Component와 Function Component에서의 `props` 사용
 
@@ -237,13 +237,13 @@ class ClassComp extends React.Component {
 
 - 화면 출력
 
-![image-20210608170404226](../../../md-img/image-20210608170404226.png)
+![image-20210608170404226](../../md-img/image-20210608170404226.png)
 
 ## 6. Class Component: Life-cycle 구현
 
 - 클래스형 컴포넌트의 라이프 사이클(기본)
 
-  ![image-20210618113743295](../../../md-img/image-20210618113743295.png)
+  ![image-20210618113743295](../../md-img/image-20210618113743295.png)
 
   1. `componentWillMount`
   2. `render`
@@ -251,7 +251,7 @@ class ClassComp extends React.Component {
 
 - 클래스형 컴포넌트의 라이프 사이클(확장)
 
-  ![image-20210618130926876](../../../md-img/image-20210618130926876.png)
+  ![image-20210618130926876](../../md-img/image-20210618130926876.png)
 
   1. `componentWillMount`
   2. `render`
@@ -318,11 +318,11 @@ class ClassComp extends React.Component {
 
 > 
 
-![image-20210618160658144](../../../md-img/image-20210618160658144.png)
+![image-20210618160658144](../../md-img/image-20210618160658144.png)
 
-![image-20210618175555264](../../../md-img/image-20210618175555264.png)
+![image-20210618175555264](../../md-img/image-20210618175555264.png)
 
-![image-20210618175729906](../../../md-img/image-20210618175729906.png)
+![image-20210618175729906](../../md-img/image-20210618175729906.png)
 
 ```react
 var funcStyle = 'color:blue';
