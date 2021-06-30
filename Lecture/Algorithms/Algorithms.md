@@ -1376,3 +1376,715 @@ else:
     print("사이클이 발생하지 않았습니다.")
 ```
 
+## 14. 크루스칼 알고리즘: 최소 신장 트리를 찾는 알고리즘
+
+### 14-1. 신장 트리
+
+> 그래프에서 모든 노드를 포함하면서 사이클이 존재하지 않는 부분 그래프
+
+- 트리의 조건: 모든 노드가 포함되어 서로 연결되면서 사이클이 존재하지 않는다
+
+### 14-2. 최소 신장 트리
+
+- 문제 예제
+  - 최소한의 비용으로 구성되는 신장 트리 찾기
+  - N개의 도시가 존재하는 상황에서 두 도시 사이에 도로를 놓아 전체 도시가 서로 연결될 수 있게 도로 설치하기
+
+### 14-3. 크루스칼 알고리즘
+
+- 대표적인 최소 신장 트리 알고리즘
+- 그리디 알고리즘의 한 종류
+
+#### 동작 순서
+
+1. 간선 데이터를 비용을 기준으로 오름차순 정렬
+2. 정렬된 순서대로 간선을 하나씩 합집합 연산을 수행하며 현재의 간선이 사이클을 발생시키는지 확인
+   1. 사이클이 발생하지 않으면 최소 신장 트리에 포함
+   2. 사이클이 발생하면 최소 신장 트리에서 제외
+3. 모든 간선에 대해 2번 반복
+4. 최소 신장 트리에 포함된 간선의 비용을 모두 더해서 최종 비용 계산
+
+#### 📌 구현 예제
+
+```python
+# 특정 원소가 속한 집합 찾기
+def find_parent(parent, x):
+    # 루트 노드 찾을 때까지 재귀 호출
+    if parent[x] != x:
+        parent[x] = find_parent(parent, parent[x])
+    return parent[x]
+
+# 두 원소가 속한 집합 합치기
+def union_parent(parent, a, b):
+    a = find_parent(parent, a)
+    b = find_parent(parent, b)
+    if a < b:
+        parent[b] = a
+    else:
+        parent[a] = b
+       
+# 노드의 개수와 간선(Union 연산)의 개수 입력 받기
+v, e = map(int, input().split())
+parent = [0] * (v + 1)	# 부모 테이블 초기화
+
+# 모든 간선을 담을 리스트와 최종 비용을 담을 변수
+edges = []
+result = 0
+
+# 부모 테이블상에서 부모를 자기 자신으로 초기화
+for i in range(1, v + 1):
+    parent[i] = i
+    
+# 모든 간선에 대한 정보 입력받기
+for _ in range(e):
+    a, b, cost = map(int, input().split())
+    # 비용 순으로 정렬하기 위해 튜플의 첫 번째 원소를 비용으로 설정
+    edges.append((cost, a, b))
+    
+# 간선 비용순으로 정렬
+edges.sort()
+
+# 간선을 하나씩 확인하며
+for edge in edges:
+    cost, a, b = edge
+    # 사이클이 발생하지 않는 경우에만 집합에 포함
+    if find_parent(parent, a) != find_parent(parent, b):
+        union_parent(parent, a, b)
+        result += cost
+        
+print(result)
+```
+
+- 시간 복잡도: 표준 라이브러리 사용 시 간선 개수가 E개일 때, O(E log E)
+  - 가장 많은 시간을 요구하는 곳은 간선 정렬
+
+## 15. 최소 공통 조상: 트리에서 최소 공통 조상 찾기 알고리즘
+
+#### 문제1. LCA (기초 문제)
+
+> 참조: https://www.acmicpc.net/problem/11437
+
+N(2 ≤ N ≤ 50,000)개의 정점으로 이루어진 트리가 주어진다. 트리의 각 정점은 1번부터 N번까지 번호가 매겨져 있으며, 루트는 1번이다. 두 노드의 쌍 M(1 ≤ M ≤ 10,000)개가 주어졌을 때, 두 노드의 가장 가까운 공통 조상이 몇 번인지 출력한다.
+
+`입력 조건`
+
+- 첫째 줄에 노드의 개수 N이 주어지고, 다음 N-1개 줄에는 트리 상에서 연결된 두 정점이 주어진다.
+- 그 다음 줄에는 가장 가까운 공통 조상을 알고싶은 쌍의 개수 M이 주어지고, 다음 M개 줄에는 정점 쌍이 주어진다.
+
+`출력 조건`
+
+- M개의 줄에 차례대로 입력받은 두 정점의 가장 가까운 공통 조상을 출력한다.
+
+`입력 예시`
+
+```powershell
+15
+1 2
+1 3
+2 4
+3 7
+6 2
+3 8
+4 9
+2 5
+5 11
+7 13
+10 4
+11 15
+12 5
+14 7
+6
+6 11
+10 9
+2 6
+7 6
+8 13
+8 15
+```
+
+`출력 예시`
+
+```powershell
+2
+4
+2
+1
+3
+1
+```
+
+- 두 노드의 공통된 조상 중에서 가장 가까운 조상을 찾는 문제
+- **최소 공통 조상 찾기 알고리즘** 사용
+  1. 모든 노드에 대한 깊이(depth)를 계산한다.
+  2. 최소 공통 조상을 찾을 두 노드를 확인한다.
+     1. 먼저 두 노드의 깊이(depth)가 동일하도록 거슬러 올라간다.
+     2. 이후 부모가 같아질 때까지 반복적으로 두 노드의 부모 방향으로 거슬러 올라간다.
+  3. 모든 LCA(a, b) 연산에 대해 2번 과정 반복
+
+#### 답안
+
+```python
+import sys
+sys.setrecursionlimit(int(1e5))	# 런타임 오류 피하기
+n = int(input())
+
+parent = [0] * (n + 1)	# 부모 노드 정보
+d = [0] * (n + 1)	# 각 노드까지의 깊이
+c = [0] * (n + 1)	# 각 노드의 깊이가 계산됐는지 여부
+graph = [[] for _ in range(n + 1)]	# 그래프(graph) 정보
+
+for _ in range(n - 1):
+    a, b = map(int, input().split())
+    graph[a].append(b)
+    graph[b].append(a)
+    
+# 루트 노드부터 시작해서 깊이(depth)를 구하는 함수
+def dfs(x, depth):
+    c[x] = True
+    d[x] = depth
+    for y in graph[x]:
+        if c[y]:	# 이미 깊이를 구했다면 넘기기
+            continue
+        parent[y] = x
+        dfs(y, depth + 1)
+        
+# A와 B의 최소 공통 조상을 찾는 함수
+def lca(a, b):
+    # 먼저 깊이(depth)가 동일하도록 설정
+    while d[a] != d[b]:
+        if d[a] > d[b]:
+            a = parent[a]
+        else:
+            b = parent[b]
+    # 노드가 같아지도록 설정
+    while a != b:
+        a = parent[a]
+        b = parent[b]
+    return a
+
+dfs(1, 0)	# 루트 노드는 1번 노드
+
+m = int(input())
+
+for i in range(m):
+    a, b = map(int, input().split())
+    print(lca(a, b))
+```
+
+- 시간 복잡도: O(NM)
+  - 매 쿼리마다 부모 방향으로 거슬러 올라가기 위해 최악의 경우 O(N)의 시간 복잡도가 요구되므로 모든 쿼리를 처리할 때 시간 복잡도는 O(NM)이 된다.
+
+### 문제2. LCA 2 (심화 문제)
+
+> 참조: https://www.acmicpc.net/problem/11438
+
+N(2 ≤ N ≤ 100,000)개의 정점으로 이루어진 트리가 주어진다. 트리의 각 정점은 1번부터 N번까지 번호가 매겨져 있으며, 루트는 1번이다. 두 노드의 쌍 M(1 ≤ M ≤ 100,000)개가 주어졌을 때, 두 노드의 가장 가까운 공통 조상이 몇 번인지 출력한다.
+
+`입력 조건`
+
+- 첫째 줄에 노드의 개수 N이 주어지고, 다음 N-1개 줄에는 트리 상에서 연결된 두 정점이 주어진다.
+- 그 다음 줄에는 가장 가까운 공통 조상을 알고싶은 쌍의 개수 M이 주어지고, 다음 M개 줄에는 정점 쌍이 주어진다.
+
+`출력 조건`
+
+- M개의 줄에 차례대로 입력받은 두 정점의 가장 가까운 공통 조상을 출력한다.
+
+`입력 예시`
+
+```bash
+15
+1 2
+1 3
+2 4
+3 7
+6 2
+3 8
+4 9
+2 5
+5 11
+7 13
+10 4
+11 15
+12 5
+14 7
+6
+6 11
+10 9
+2 6
+7 6
+8 13
+8 15
+```
+
+`출력 예시`
+
+```bash
+2
+4
+2
+1
+3
+1
+```
+
+- LCA 알고리즘 속도 개선
+  - 2의 제곱 형태로 거슬러 올라가도록 하면 O(log N)의 시간 복잡도 보장 가능
+  - 메모리를 조금 더 사용하여 각 노드에 대해  2^i번째 부모에 대한 정보를 기록
+- 개선된 LCA 알고리즘
+  1. 모든 노드에 대해 깊이(depth)와 2^i번째 부모에 대한 정보 계산
+  2. 두 노드의 깊이 맞추기
+  3. 부모를 거슬러 올라가기
+- 시간 복잡도: O(M log N)
+  - 다이나믹 프로그래밍 or 세그먼트 트리를 이용해서 시간 복잡도 개선 가능
+  - 매 쿼리마다 부모를 거슬러 올라가기 위해 O(log N)의 복잡도가 필요하므로 모든 쿼리를 처리할 때의 시간 복잡도가 O(M log N)이 된다.
+
+#### 답안
+
+```python
+import sys
+input = sys.stdin.readline	# 시간 초과를 피하기 위한 빠른 입력 함수
+sys.setrecursionlimit(int(1e5))	# 런타임 오류 피하기
+LOG = 21	# 2^20 = 1,000,000
+
+n = int(input())
+parent = [[0] * LOG for _ in range(n + 1)]	# 부모 노드 정보
+d = [0] * (n + 1)	# 각 노드까지의 깊이
+c = [0] * (n + 1)	# 각 노드의 깊이가 계산됐는지 여부
+graph = [[] for _ in range(n + 1)]	# 그래프(graph) 정보
+
+for _ in range(n - 1):
+    a, b = map(int, input().split())
+    graph[a].append(b)
+    graph[b].append(a)
+    
+# 루트 노드부터 시작해서 깊이(depth)를 구하는 함수
+def dfs(x, depth):
+    c[x] = True
+    d[x] = depth
+    for y in graph[x]:
+        if c[y]:	# 이미 깊이를 구했다면 넘기기
+            continue
+        parent[y] = x
+        dfs(y, depth + 1)
+
+# 전체 부모 관계를 설정하는 함수
+def set_parent():
+    def(1, 0)	# 루트 노드는 1번 노드
+    for i in range(1, LOG):
+        for j in range(1, n + 1):
+            parent[j][i] = parent[parent[j][i - 1]][i-1]
+            
+# A와 B의 최소 공통 조상을 찾는 함수
+def lca(a, b):
+    # b가 더 깊도록 설정
+    if d[a] > d[b]:
+        a, b = b, a
+    # 먼저 깊이(depth)가 동일하도록
+    for i in range(LOG - 1, -1, -1):
+        if d[b] - d[a] >= (1 << i):
+            b = parent[b][i]
+    # 부모가 같아지도록
+    if a == b:
+        return a;
+    for i in range(LOG - 1, -1, -1):
+        # 조상을 향해 거슬러 올라가기
+        if parent[a][i] != parent[b][i]:
+            a = parent[a][i]
+            b = parent[b][i]
+    # 이후에 부모가 찾고자 하는 조상
+    return parent[a][0]
+
+set_parent()
+
+m = int(input())
+
+for i in range(m):
+    a, b = map(int, input().split())
+    print(lca(a, b))
+```
+
+## 16. 위상 정렬
+
+> **사이클이 없는 방향 그래프(DAG)**의 모든 노드를 방향성에 거스르지 않도록 순서대로 나열하는 것
+
+### 16-1. 진입차수와 진출차수
+
+- 진입차수(Indegree): 특정 노드로 들어오는 간선 개수
+- 진출차수(Outdegree): 특정 노드에서 나가는 간선 개수
+
+### 16-2. 위상 정렬 알고리즘
+
+#### 동작 순서
+
+- **큐**를 이용하는 위상 정렬 알고리즘
+  1. 진입차수가 0인 모든 노드를 큐에 넣는다.
+     1. 처음에는 노드 1로 시작
+  2. 큐가 빌 때까지 다음 과정 반복
+     1. 큐에서 원소를 꺼내 해당 노드에서 나가는 간선을 그래프에서 제거
+     2. 새롭게 진입차수가 0이 된 노드를 큐에 넣는다.
+- 각 노드가 큐에 들어온 순서 = 위상 정렬을 수행한 결과
+
+#### 위상 정렬 특징
+
+- 위상 정렬은 DAG (Direct Acyclic Graph)에 대해서만 수행 가능
+- 한 단계에서 큐에 새롭게 들어가는 원소가 2개 이상인 경우 여러 가지 답이 존재할 수 있음
+- 모든 원소를 방문하기 전에 큐가 빈다면 사이클이 존재하는 것
+  - 사이클에 포함된 원소 중에서 어떤 원소도 큐에 들어가지 못한다.
+- 스택을 활용한 DFS로 위상 정렬 수행 가능
+
+#### 📌 구현 예제
+
+```python
+from collection import deque
+
+# 노드의 개수와 간선 개수 입력받기
+v, e = map(int, input().split())
+# 모든 노드에 대한 진입차수는 0으로 초기화
+indegree = [0] * (v + 1)
+# 각 노드에 연결된 간선 정보를 담을 연결 리스트 초기화
+graph = [[] for i in range(v + 1)]
+
+# 방향 그래프의 모든 간선 정보 입력 받기
+for _ in range(e):
+    a, b = map(int, input().split())
+    graph[a].append(b)	# 정점 A에서 B로 이동 가능
+    # 진입차수 1씩 증가
+    indegree[b] += 1
+    
+# 위상정렬 함수
+def topology_sort():
+    result = []	# 알고리즘 수행 결과
+    q = deque()	# 큐 기능을 위한 deque 라이브러리 사용
+    # 처음 시작할 때 진입차수가 0인 노드를 큐에 삽입
+    for i in range(1, v + 1):
+        if indegree[i] == 0:
+            q.append(i)
+    # 큐가 빌 때까지 반복
+    while q:
+        # 큐에서 원소 꺼내기
+        now = q.popleft()
+        result.append(now)
+        # 해당 원소와 연결된 노드들의 진입차수에서 1 빼기
+        for i in graph[now]:
+            indegree[i] -= 1
+            # 새롭게 진입차수가 0이 되는 노드를 큐에 삽입
+            if indegree[i] == 0:
+                q.append(i)
+    # 위상정렬 수행 결과 출력
+    for i in result:
+        print(i, end=' ')
+        
+topology_sort()
+```
+
+- 시간 복잡도: O(V + E). 위상정렬을 위해 차례대로 모든 노드를 확인하고 각 노드에서 나가는 간선을 차례대로 제거해야 하기 때문.
+
+## 17. 재귀 함수 (Recursive Function)
+
+> 자기 자신을 다시 호출하는 함수
+
+```python
+def recursive_function():
+    print('재귀 함수를 호출합니다.')
+    recursive_function()
+    
+recursive_function()
+```
+
+- '재귀 함수를 호출합니다.' 문자열을 무한히 출력하다가 최대 재귀 깊이 초과 메시지 출력
+
+### 17- 1. 재귀 함수의 종료 조건
+
+- 재귀 함수를 문제 풀이에서 사용할 때는 재귀 함수의 종료 조건을 반드시 명시해야 한다.
+
+- 종료 조건을 제대로 명시하지 않으면 함수가 무한 호출된다.
+
+```python
+def recursive_function(i):
+    # 100번째 호출을 했을 때 종료되도록 종료 조건 명시
+    if i == 100:
+        return
+    print(i, '번째 재귀 함수에서', i + 1, '번째 재귀 함수를 호출합니다.')
+    recursive_function(i + 1)
+    print(i, '번째 재귀함수를 종료합니다.')
+    
+recursive_function(1)
+```
+
+  ### 17-2. 팩토리얼 구현
+
+- n! = 1 x 2 x 3 x ... x (n - 1) x n
+- 0!과 1!의 값은 1
+
+```python
+# 반복적으로 구현한 n!
+def factorial_iterative(n):
+    result = 1
+    # 1부터 n까지의 수를 차례대로 곱하기
+    for i in range(1, n + 1):
+        result *= i
+    return result
+
+# 재귀적으로 구현한 n!
+def factorial_recursive(n):
+    if n <= 1:	# n이 1 이하인 경우 1을 반환
+        return 1
+    # n! = n * (n - 1)!을 그대로 코드로 작성하기
+    return n * factorial_recursive(n - 1)
+
+# 각각의 방식으로 구현한 n! 출력(n = 5)
+print('반복적으로 구현:', factorial_iterative(5))
+print('재귀적으로 구현:', factorial_recursive(5))
+```
+
+### 17-3. 최대공약수 계산 (유클리드 호제법)
+
+#### 💡 유클리드 호제법
+
+> 두 자연수 A, B(A > B)에 대해 A를 B로 나눈 나머지는 R일 때, A와 B의 최대공약수는 B와 R의 최대공약수와 같다.
+
+```python
+def gcd(a, b):
+    if a % b == 0:
+        return b
+    else:
+        return gcd(b, a % b)
+    
+print(gcd(192, 162))
+```
+
+### 17-4. 재귀함수 사용시 유의 사항
+
+- 재귀 함수를 잘 활용하면 복잡한 알고리즘을 간결하게 작성할 수 있지만 다른 사람이 이해하기 어려운 형태의 코드가 될 수 있으므로 신중하게 사용해야 한다.
+- 모든 재귀 함수는 반복문을 이용해서 동일한 기능 구현 가능
+- 재귀 함수가 반복문보다 유리한 경우도 있고 불리한 경우도 있으므로 잘 선택해서 구현해야 한다.
+- 컴퓨터가 함수를 호출하면 컴퓨터 메모리 내부의 스택 프레임에 쌓이므로 스택을 사용해야 할 때 구현상 스택 라이브러리 대신에 재귀 함수를 이용하는 경우가 많다.
+
+## 18. 유용한 표준 라이브러리
+
+- 내장 함수: 기본 입출력 함수부터 정렬 함수까지 기본 함수 제공
+  - 파이썬 프로그램 작성 시 필수적인 기능 포함
+- itertools: 파이썬에서 반복되는 형태의 데이터를 처리하기 위한 유용한 기능 제공
+  - 특히 순열과 조합 라이브러리는 코딩 테스트에서 자주 사용
+- heapq: 힙(Heap) 자료구조 제공
+  - 보통 우선순위 큐 기능 구현을 위해 사용
+- bisect: 이진 탐색(Binary Search) 기능 제공
+- collections: 덱(deque), 카운터(Counter) 등의 유용한 자료구조르 포함
+- math: 필수적인 수학 기능 제공
+  - 팩토리얼, 제곱근, 최대공약수(GCD), 삼각함수 관련 함수부터 파이(pi) 같은 상수 포함
+
+### 18-1. 내장 함수
+
+```python
+# sum()
+result = sum([1, 2, 3, 4, 5])
+print(result)
+
+# min(), max()
+min_result = min(7, 3, 5, 2)
+max_result = max(7, 3, 5, 2)
+print(min_result, max_result)
+
+# eval()
+result = eval("(3+5)*7")
+print(result)
+
+# sorted(): 기본 오름차순
+result = sorted([9, 1, 8, 5, 4])
+reverse_result = sorted([9, 1, 8, 5, 4], reverse=True)	# 내림차순 정렬
+print(result)
+print(reverse_result)
+
+# sorted() with key
+array = [('홍길동', 35), ('이순신', 75), ('아무개', 50)]
+result = sorted(array, key=lambda x : x[1], reverse=True)
+print(result)
+```
+
+### 18-2. itertools
+
+#### 순열과 조합
+
+- 순열: 서로 다른 n개에서 서로 다른 r개를 선택하여 일렬로 나열하는 것
+
+  > 순열의 수 공식: nPr = n * (n - 1) * (n - 2) * ... * (n - r + 1)
+
+  ```python
+  from itertools import permutations
+  
+  data = ['A', 'B', 'C']	# 데이터 준비
+  
+  result = list(permutations(data, 3))	# 모든 순열 구하기
+  print(result)
+  ```
+
+- 조합: 서로 다른 n개에서 순서에 상관없이 서로 다른 r개를 선택하는 것
+
+  > 조합의 수 공식: nCr =  n * (n - 1) * (n - 2) * ... * (n - r + 1) / r!
+
+  ```python
+  from itertools import combinations
+  
+  data = ['A', 'B', 'C']	# 데이터 준비
+  
+  result = list(combinations(data, 2))	# 2개를 뽑는 모든 조합 구하기
+  print(result)
+  ```
+
+#### 중복 순열과 중복 조합
+
+- 중복 순열
+
+  ```python
+  from itertools import product
+  
+  data = ['A', 'B', 'C']	# 데이터 준비
+  
+  result = list(product(data, repeat=2))	# 2개를 뽑는 모든 순열 구하기 (중복 허용)
+  print(result)
+  ```
+
+- 중복 조합
+
+  ```python
+  from itertools import combinations_with_replacement
+  
+  data = ['A', 'B', 'C']	# 데이터 준비
+  
+  result = list(combinations_with_replacement(data, 2))	# 2개를 뽑는 모든 조합 구하기 (중복 허용)
+  print(result)
+  ```
+
+
+### 18-3. collections
+
+#### Counter
+
+- 등장 횟수를 세는 기능 제공
+- 리스트 같이 반복 가능한(iterable) 객체가 주어졌을 때 내부의 원소가 몇 번씩 등장했는지 알려준다.
+
+```python
+from collections import Counter
+
+counter = Count(['red', 'blue', 'red', 'green', 'blue', 'blue'])
+
+print(counter['blue'])	# 'blue'가 등장한 횟수 출력
+print(counter['green'])	# 'green'이 등장한 횟수 출력
+print(dict(counter))	# 사전 자료형으로 변환
+```
+
+### 18-4. math
+
+#### 최대 공약수와 최소 공배수
+
+- 최대 공약수를 구하는 함수: `gcd()`
+
+```python
+import math
+
+# 최소 공배수(LCM)을 구하는 함수
+def lcm(a, b):
+    return a * b // math.gcd(a, b)
+
+a = 21
+b = 14
+
+print(math.gcd(21, 14))	# 최대 공약수(GCD) 계산
+print(lcm(21, 14))	# 최소 공배수(LCM) 계산
+```
+
+## 19. 소수 여부를 빠르게 처리하는 알고리즘들
+
+### 19-1. 소수 (Prime Number)
+
+> 1보다 큰 자연수 중에서 1과 자기 자신을 제외한 자연수로는 나누어 떨어지지 않는 자연수
+
+#### 📌 기본 알고리즘 구현
+
+```python
+# 소수 판별 함수 (2이상 자연수에 대해)
+def is_prime_number(x):
+    # 2부터 (x - 1)까지의 모든 수 확인
+    for i in range(2, x):
+        # x가 해당 수로 나누어떨어지면
+        if x % i == 0:
+            return False	# 소수 아님
+    return True	# 아니면 소수
+
+print(is_prime_number(4))
+print(is_prime_number(7))
+```
+
+- 시간 복잡도: 2부터 X-1까지 모든 수를 하나씩 확인하므로 O(X)
+
+### 19-2. 약수의 성질
+
+- 모든 약수가 가운데 약수를 기준으로 곱셈 연산에 대해 대칭을 이루므로 특정 자연수의 모든 약수를 찾을 때 가운데 약수(제곱근)까지만 확인하면 된다.
+
+  예) 16의 약수: 1, 2, 4, 8, 16 (대칭). 16이 2로 나누어떨어지면 8로도 나누어떨어진다는 것을 의미
+
+#### 📌 개선된 알고리즘 구현
+
+```python
+import math
+
+# 소수 판별 함수 (2이상의 자연수)
+def is_prime_number(x):
+    # 2부터 x의 제곱근까지의 모든 수 확인
+    for i in range(2, int(math.sqrt(x)) + 1):
+        # x가 해당 수로 나누어떨어진다면
+        if x % i == 0:
+            return False	# 소수가 아님
+    return True	# 소수
+
+print(is_prime_number(4))
+print(is_prime_number(7))
+```
+
+- 시간 복잡도: 2부터 X-1까지(소수점 이하 무시) 모든 수를 하나씩 확인하므로 O(N^0.5)
+
+### 19-3. 다수의 소수 판별: 에라토스테네스의 체 알고리즘
+
+- 다수의 자연수에 대해 소수 여부를 판별할 때 사용하는 대표적인 알고리즘
+- N보다 작거나 같은 모든 소수를 찾을 때 사용할 수 있다.
+
+#### 동작 순서
+
+1. 2부터 N까지의 모든 자연수  나열
+2. 남은 수 중에서 아직 처리하지 않은 가장 작은 수 i를 찾는다.
+3. 남은 수 중에서 i의 배수를 모두 제거 (i는 제거하지 않음)
+4. 더 이상 반복할 수 없을 때까지 2번과 3번 과정 반복
+
+#### 📌 구현 예제
+
+```python
+import math
+
+n = 1000	# 2부터 1,000까지의 모든 수에 대해 소수 판별
+# 처음엔 모든 수가 소수(True)인 것으로 초기화(0과 1 제외)
+array = [True for i in range(n + 1)]
+
+# 에라토스테네스의 체 알고리즘 수행
+# 2부터 n의 제곱근까지의 모든 수 확인
+for i in range(2, int(math.sqrt(n)) + 1):
+    if array[i] == True:	# i가 소수인 경우(남은 수인 경우)
+        # i를 제외한 i의 모든 배수 삭제
+        j = 2
+        while i * j <= n:
+            array[i * j] = False
+            j += 1
+            
+# 모든 소수 출력
+for i in range(2, n + 1):
+    if array[i]:
+        print(i, end=' ')
+```
+
+- 시간 복잡도: O(N loglogN)
+- 에라토스테네스의 체는 사실상 선형 시간에 가까울 정도로 매우 빠르지만 각 자연수에 대한 소수 여부를 저장하기 때문에 메모리가 많이 필요해서 수가 클 때에는 효과적으로 사용하기 힘들다.
+
+## 20. 이진 탐색: 정렬된 데이터에서 빠르게 데이터 찾기
+
+- 순차 탐색: 리스트 안에 있는 특정 데이터를 찾기 위해 앞에서부터 데이터를 하나씩 확인하는 방법
+- 이진 탐색: 정렬된 리스트에서 탐색 범위를 절반씩 좁혀가며 데이터를 탐색하는 방법으로 시작점, 끝점, 중간점을 이용해 탐색 범위를 설정
+
